@@ -1,5 +1,6 @@
 # 07_06_CHAT
 ## https://micckey34.github.io/07_06_CHAT/
+## https://micckey34.github.io/07_06_CHAT/game/game.html
 ## プロダクトの紹介
 - チャットアプリ　＋　オンラインゲーム
 ## こだわった点
