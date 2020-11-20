@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="ui">
+        <div class="start-menu">
+            <h1>CHAT</h1>
+            <input id="myName" type="text" placeholder="my name">
+            <button id="start">はじめる</button>
+        </div>
+        <header>
+            <p id="otherName"></p>
+        </header>
+        <div class="chat-area" id="output">
+        </div>
+        <div class="text">
+            <textarea name="" id="text" cols="30" rows="10"></textarea>
+            <button id="send">送信</button>
+        </div>
+
+    </div>
+    <script src="jquery-3.5.1.min.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyDjldFwcm6cmD_TXk8n3yBNKUtT3xjKlFE",
+            authDomain: "chat-db1f2.firebaseapp.com",
+            databaseURL: "https://chat-db1f2.firebaseio.com",
+            projectId: "chat-db1f2",
+            storageBucket: "chat-db1f2.appspot.com",
+            messagingSenderId: "657850593438",
+            appId: "1:657850593438:web:f6e2d0cc9b14d5280f4b8f"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script>
+        // 日時をいい感じの形式にする関数
+        function convertFromFirestoreTimestampToDatetime(timestamp) {
+            const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+            const Y = _d.getFullYear();
+            const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+            const d = _d.getDate().toString().padStart(2, '0');
+            const H = _d.getHours().toString().padStart(2, '0');
+            const i = _d.getMinutes().toString().padStart(2, '0');
+            const s = _d.getSeconds().toString().padStart(2, '0');
+            return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+        };
+
+        const db = firebase.firestore().collection('chat2');
+
+        $('#start').on('click', function() {
+            const myname = $('#myName').val();
+            localStorage.setItem('name', myname);
+            $('.start-menu').hide();
+        });
+        $('#send').on('click', function() {
+            const data = {
+                name: $('#myName').val(),
+                text: $('#text').val(),
+                time: firebase.firestore.FieldValue.serverTimestamp(),
+            }
+            db.add(data);
+            $('#text').val('');
+
+        });
+        if (localStorage.getItem('name')) {
+            const myname = localStorage.getItem('name');
+            $('#myName').val(myname);
+        } else {};
+        db.orderBy('time', 'asc').onSnapshot(function(querySnapshot) {
+            // console.log(querySnapshot.docs);
+            const dataArray = [];
+            const myName = $('#myName').val();
+            querySnapshot.docs.forEach(function(doc) {
+                const data = doc.data();
+                if (data.name == myName) {
+                    const message1 = `<div class="abc"><p class="text-text">${data.text} </p><p class="time">${convertFromFirestoreTimestampToDatetime(data.time.seconds)}</p><p class="text-name1">${data.name}</p></div>`;
+                    dataArray.push(message1);
+                } else {
+                    const message2 = `<div class="def"><p class="text-text">${data.text} </p><p class="text-name2">${data.name}</p><p class="time">${convertFromFirestoreTimestampToDatetime(data.time.seconds)}</p></div>`;
+                    dataArray.push(message2);
+                    $('#otherName').text(data.name)
+                }
+            });
+            $('#output').html(dataArray);
+
+
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>firegame</title>
+    <link rel="stylesheet" href="game.css">
+</head>
+
+<body>
+    <div class="ui">
+        <div class="start">
+            <h1>ゲーム</h1>
+            <div>
+                <button id="user1-start">エミリアで START</button>
+                <button id="user2-start">スバルで START</button>
+            </div>
+
+        </div>
+        <div class="game">
+            <input type="text" id="name">
+            <h1>エミリア　vs　スバル</h1>
+            <div class="btn">
+                <button id="attack">攻撃</button>
+                <button id="guard">防御</button>
+                <button id="counter">カウンター</button>
+            </div>
+            <div class="result">
+                <button id="battle">いざ、勝負！</button>
+                <p id="result"></p>
+            </div>
+        </div>
+    </div>
+    <script src="../jquery-3.5.1.min.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyDjldFwcm6cmD_TXk8n3yBNKUtT3xjKlFE",
+            authDomain: "chat-db1f2.firebaseapp.com",
+            databaseURL: "https://chat-db1f2.firebaseio.com",
+            projectId: "chat-db1f2",
+            storageBucket: "chat-db1f2.appspot.com",
+            messagingSenderId: "657850593438",
+            appId: "1:657850593438:web:f6e2d0cc9b14d5280f4b8f"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script>
+        const db = firebase.firestore().collection('game');
+        //プレイヤーを決める
+        $('#user1-start').on('click', function() {
+            $('.start').hide();
+            const myName = 'エミリア';
+            localStorage.setItem('name2', myName);
+            $('#name').val(myName);
+        });
+        $('#user2-start').on('click', function() {
+            $('.start').hide();
+            const myName = 'スバル';
+            localStorage.setItem('name2', myName);
+            $('#name').val(myName);
+        });
+
+        if (localStorage.getItem('name2')) {
+            const myName = localStorage.getItem('name2');
+            $('#name').val(myName);
+        } else {};
+
+        //バトルボタン
+        $('#attack').on('click', function() {
+            const myName = $('#name').val();
+            console.log(myName);
+            if (myName == 'エミリア') {
+                db.doc('user1').update({
+                    number: 50
+                });
+            } else {
+                db.doc('user2').update({
+                    number: 50
+                });
+            }
+
+        })
+        $('#guard').on('click', function() {
+            const myName = $('#name').val();
+            console.log(myName);
+            if (myName == 'エミリア') {
+                db.doc('user1').update({
+                    number: 100
+                });
+            } else {
+                db.doc('user2').update({
+                    number: 100
+                });
+            }
+        })
+        $('#counter').on('click', function() {
+            const number = Math.floor(Math.random() * 99) + 1;
+            const myName = $('#name').val();
+            if (myName == 'エミリア') {
+                db.doc('user1').update({
+                    number: number
+                });
+            } else {
+                db.doc('user2').update({
+                    number: number
+                });
+            }
+        });
+        let number100 = 0;
+        let number200 = 0;
+        db.onSnapshot(function(querySnapshot) {
+            console.log(querySnapshot.docs);
+            querySnapshot.docs.forEach(function(doc) {
+                const data = doc.data();
+                // console.log(data);
+                if (data.name == 'user1') {
+                    let user1Number = data.number;
+                    console.log(user1Number);
+                    number100 = user1Number;
+                } else {
+                    let user2Number = data.number;
+                    // console.log(user2Number);
+                    number200 = user2Number;
+                };
+            })
+            console.log(number100);
+            console.log(number200);
+            $('#battle').on('click', function() {
+                if (number100 == 50 && number200 < 50) {
+                    $('#result').text('エミリアは攻撃に成功した');
+                } else if (number100 < 50 && number200 == 50) {
+                    $('#result').text('スバルは攻撃に成功した');
+                } else if (number100 == 100 && number200 == 50) {
+                    $('#result').text('スバルは攻撃を仕掛けたが、エミリアは防御した');
+                } else if (number100 == 50 && number200 == 100) {
+                    $('#result').text('エミリアは攻撃を仕掛けたが、スバルは防御した');
+                } else if (number100 == 100 && number200 == 100) {
+                    $('#result').text('お互いに攻撃を見合わせた');
+                } else if (number100 == 50 && number200 == 50) {
+                    $('#result').text('互いに攻撃したがダメージは与えられなかった');
+                } else if (number200 == 50 && number100 >= 50 && number100 < 100) {
+                    $('#result').text('スバルはエミリアの攻撃をかわしカウンターに成功した');
+                } else if (number100 == 50 && number200 >= 50 && number200 < 100) {
+                    $('#result').text('エミリアはスバルの攻撃をかわしカウンターに成功した');
+                } else if (number100 == 100 && number200 < 100 && number200 != 50) {
+                    $('#result').text('エミリアの防御、スバルのカウンターは失敗した');
+                } else if (number200 == 100 && number100 < 100 && number100 != 50) {
+                    $('#result').text('スバルの防御、エミリアのカウンターは失敗した');
+                };
+            });
+        });
+    </script>
+</body>
+
+</html>
