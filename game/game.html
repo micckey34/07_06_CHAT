@@ -21,14 +21,21 @@
         <div class="game">
             <input type="text" id="name">
             <h1>エミリア　vs　スバル</h1>
+            <div class="hp">
+                <meter id="emiria-hp" min="0" max="100" value="100"></meter>
+
+                <meter id="subaru-hp" min="0" max="100" value="100"></meter>
+            </div>
             <div class="btn">
                 <button id="attack">攻撃</button>
                 <button id="guard">防御</button>
                 <button id="counter">カウンター</button>
             </div>
             <div class="result">
-                <button id="battle">いざ、勝負！</button>
+                <button id="battle">勝負！</button>
+                <button id="next">次へ</button>
                 <p id="result"></p>
+                <p id="win"></p>
             </div>
         </div>
     </div>
@@ -42,7 +49,7 @@
     <script>
         // Your web app's Firebase configuration
         var firebaseConfig = {
-            apiKey: "AIzaSyDjldFwcm6cmD_TXk8n3yBNKUtT3xjKlFE",
+            apiKey: "",
             authDomain: "chat-db1f2.firebaseapp.com",
             databaseURL: "https://chat-db1f2.firebaseio.com",
             projectId: "chat-db1f2",
@@ -54,6 +61,7 @@
         firebase.initializeApp(firebaseConfig);
     </script>
     <script>
+        $('#next').hide();
         const db = firebase.firestore().collection('game');
         //プレイヤーを決める
         $('#user1-start').on('click', function() {
@@ -135,10 +143,18 @@
             console.log(number100);
             console.log(number200);
             $('#battle').on('click', function() {
+                $('#battle').hide();
+                $('#next').show();
                 if (number100 == 50 && number200 < 50) {
                     $('#result').text('エミリアは攻撃に成功した');
+                    let sbahp = $('#subaru-hp').val();
+                    sbahp -= 20;
+                    $('#subaru-hp').val(sbahp);
                 } else if (number100 < 50 && number200 == 50) {
                     $('#result').text('スバルは攻撃に成功した');
+                    let emihp = $('#emiria-hp').val();
+                    emihp -= 20;
+                    $('#emiria-hp').val(emihp);
                 } else if (number100 == 100 && number200 == 50) {
                     $('#result').text('スバルは攻撃を仕掛けたが、エミリアは防御した');
                 } else if (number100 == 50 && number200 == 100) {
@@ -149,14 +165,45 @@
                     $('#result').text('互いに攻撃したがダメージは与えられなかった');
                 } else if (number200 == 50 && number100 >= 50 && number100 < 100) {
                     $('#result').text('スバルはエミリアの攻撃をかわしカウンターに成功した');
+                    $('#result').text('スバルは攻撃に成功した');
+                    let emihp = $('#emiria-hp').val();
+                    emihp -= 10;
+                    $('#emiria-hp').val(emihp);
                 } else if (number100 == 50 && number200 >= 50 && number200 < 100) {
                     $('#result').text('エミリアはスバルの攻撃をかわしカウンターに成功した');
+                    let sbahp = $('#subaru-hp').val();
+                    sbahp -= 10;
+                    $('#subaru-hp').val(sbahp);
                 } else if (number100 == 100 && number200 < 100 && number200 != 50) {
                     $('#result').text('エミリアの防御、スバルのカウンターは失敗した');
                 } else if (number200 == 100 && number100 < 100 && number100 != 50) {
                     $('#result').text('スバルの防御、エミリアのカウンターは失敗した');
+                } else if (number200 < 100 && number200 != 50 && number100 < 100 && number100 != 50) {
+                    $('#result').text('互いにカウンターの構え、攻撃を見送った');
+
+                } else if (number100 == 1000 || number200 == 1000) {
+                    alert('error');
                 };
+                let sbaru_hp = $('#subaru-hp').val();
+                let emiria_hp = $('#emiria-hp').val();
+                if (sbaru_hp <= 0) {
+                    $('#win').text('エミリアの勝利！');
+                } else if (emiria_hp <= 0) {
+
+                    $('#win').text('スバルの勝利！');
+                } else {};
             });
+            $('#next').on('click', function() {
+                $('#battle').show();
+                $('#next').hide();
+                db.doc('user1').update({
+                    number: 1000
+                });
+                db.doc('user2').update({
+                    number: 1000
+                });
+
+            })
         });
     </script>
 </body>

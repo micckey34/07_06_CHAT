@@ -40,6 +40,18 @@
     opacity: 0;
 }
 
+.hp {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hp meter {
+    width: 300px;
+    margin: 2rem;
+}
+
 .btn {
     margin: 2rem;
 }
@@ -62,6 +74,11 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+}
+
+#win {
+    font-size: 30px;
+    color: gold;
 }
 
 .result button {
